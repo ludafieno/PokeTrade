@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PokeTrade</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <nav class="container-medium">
+            <div class="nav-wrap">
+                <a href="#" class="logo"><img src={% static 'images/PokeTrade.png' %} alt="PokeTrade" ></a>
+                <div class="nav-menu">
+                    <div class="nav-left">
+                    </div>
+                    <div class="nav-middle">
+                    </div>
+                    <div class="nav-right">
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <main>
+        {% block content %}
+    {#        Child templates#}
+        {% endblock %}
+    </main>
+    <footer>
+
+    </footer>
+
+</body>
+</html>

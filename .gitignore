@@ -1,0 +1,11 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# VSCode or PyCharm project files (optional)
+.idea/
+.vscode/
+
+# OS/system files
+.DS_Store
+Thumbs.db

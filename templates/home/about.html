@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-medium" style="margin-top: 3rem; padding: 2rem;">
+    <h1>About PokeTrade</h1>
+    <p style="margin-top: 1rem;">
+        PokeTrade is a platform where users can register, log in, and trade Pokémon cards with other trainers online.
+    </p>
+    <p style="margin-top: 1rem;">
+        Made by Ehan Ahmed, Steven Murley, Luciano Da Fieno, and Saif Aslam.
+    </p>
+    <img src="{% static 'images/espeon.png' %}" alt="Espeon" class="about-pokemon">
+</div>
+{% endblock %}

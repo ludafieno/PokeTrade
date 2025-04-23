@@ -4,11 +4,12 @@
 <div class="section-hero">
     <div class="hero-content-wrapper">
         <div class="hero-text-wrap">
-            <div class="heading-xlarge">
-                Welcome to PokeTrade!
+            <div class="heading-xlarge">Welcome to PokeTrade</div>
+            <p>Start trading Pokémon cards with other trainers now!</p>
+            <div style="margin-top: 2rem;">
+                <a href="{% url 'register' %}" class="cta-button">Create Account</a>
+                <a href="{% url 'login' %}" class="cta-button" style="margin-left: 1rem;">Login</a>
             </div>
-            <p>Trade, collect, and manage your favorite Pokémon cards with other trainers online!</p>
-            <a href="{% url 'register' %}" class="cta-button">Get Started</a>
         </div>
         <img class="snorlax" src="{% static 'images/snorlax.png' %}" alt="Snorlax" />
     </div>

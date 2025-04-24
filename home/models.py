@@ -14,3 +14,12 @@ class Report(models.Model):
 
     def __str__(self):
         return f"{self.report_type} by {self.reporter.username}"
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    starter_pokemon = models.CharField(max_length=30, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+
+

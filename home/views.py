@@ -4,21 +4,55 @@ from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
+import random
 
+
+ALL_STARTERS = [
+    "Bulbasaur", "Charmander", "Squirtle",
+    "Chikorita", "Cyndaquil", "Totodile",
+    "Treecko", "Torchic", "Mudkip",
+    "Turtwig", "Chimchar", "Piplup",
+    "Snivy", "Tepig", "Oshawott",
+    "Chespin", "Fennekin", "Froakie",
+    "Rowlet", "Litten", "Popplio",
+    "Grookey", "Scorbunny", "Sobble",
+    "Sprigatito", "Fuecoco", "Quaxly"
+]
 
 
 def index(request):
     return render(request, 'home/index.html');
 
+
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('index')
+            user = form.save()
+            auth_login(request, user)
+
+            # Save 3 random starters in session
+            request.session['starter_choices'] = random.sample(ALL_STARTERS, 3)
+
+            return redirect('choose_starter')
     else:
         form = UserCreationForm()
     return render(request, 'home/register.html', {'form': form})
+
+@login_required
+def choose_starter(request):
+    starters = request.session.get('starter_choices')
+    if not starters:
+        return redirect('dashboard')  # fallback if someone skips registration
+    if request.method == 'POST':
+        selected = request.POST.get('starter')
+        if selected in starters:
+            request.user.profile.starter_pokemon = selected
+            request.user.profile.save()
+            del request.session['starter_choices']  # clear from session
+            return redirect('dashboard')
+    return render(request, 'home/choose_starter.html', {'starters': starters})
+
 
 
 def login_view(request):

@@ -15,6 +15,9 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('report/', views.report_issue, name='report'),
 
+    path('choose_starter/', views.choose_starter, name='choose_starter'),
+
+
 
 
 

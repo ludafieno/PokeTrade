@@ -11,7 +11,7 @@
     <div class="navbar">
         <nav class="container-medium">
             <div class="nav-wrap">
-                <a href="#" class="logo"><img src={% static 'images/PokeTrade.png' %} alt="PokeTrade" ></a>
+                <a href="{% url 'index' %}" class="logo"> <img src="{% static 'images/PokeTrade.png' %}" alt="PokeTrade"> </a>
                 <div class="nav-menu">
                     <div class="nav-left">
                     </div>
@@ -29,7 +29,10 @@
         {% endblock %}
     </main>
     <footer>
-
+        <div class="container-medium">
+            <p>&copy; 2025 PokeTrade. All rights reserved.</p>
+            <p><a href="{% url 'about' %}">About</a> | <a href="{% url 'report' %}">Report</a></p>
+        </div>
     </footer>
 
 </body>

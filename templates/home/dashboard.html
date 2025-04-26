@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-medium" style="margin-top: 3rem; text-align: center;">
+    <h1>Welcome, {{ user.username }}!</h1>
+    <p>Select where you'd like to go:</p>
+
+    <div class="dashboard-options">
+        <a href="{% url 'marketplace' %}" class="dashboard-btn">🛒 Marketplace</a>
+        <a href="{% url 'collection' %}" class="dashboard-btn">📂 My Collection</a>
+        <a href="{% url 'trade' %}" class="dashboard-btn">🔁 Trade Cards</a>
+    </div>
+
+    <div class="logout-section">
+        <img src="{% static 'images/lugia.png' %}" alt="Lugia" class="dashboard-image">
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+</div>
+{% endblock %}

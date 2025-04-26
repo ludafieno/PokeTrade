@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-medium" style="margin-top: 3rem; max-width: 600px;">
+    <h2>Report an Issue</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="issue_type">Issue Type:</label>
+        <select name="issue_type" id="issue_type" required>
+            <option value="">--Select--</option>
+            <option value="user">Report a User</option>
+            <option value="bug">Report a Bug</option>
+        </select>
+
+        <label for="description" style="margin-top: 1rem;">Description:</label>
+        <textarea name="description" id="description" rows="5" required style="width: 100%;"></textarea>
+
+        <button type="submit" class="cta-button" style="margin-top: 1rem;">Submit Report</button>
+    </form>
+</div>
+{% endblock %}

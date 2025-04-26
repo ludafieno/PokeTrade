@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-medium" style="text-align: center; margin-top: 3rem;">
+    <h2>Choose Your Starter Pokémon</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+            {% for pokemon in starters %}
+            <button type="submit" name="starter" value="{{ pokemon }}" style="background: none; border: none;">
+                <img src="https://img.pokemondb.net/artwork/{{ pokemon|lower }}.jpg"
+                     alt="{{ pokemon }}" style="width: 150px; border-radius: 10px;">
+                <p><strong>{{ pokemon|capfirst }}</strong></p>
+            </button>
+            {% endfor %}
+        </div>
+    </form>
+</div>
+{% endblock %}

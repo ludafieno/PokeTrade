@@ -9,17 +9,17 @@ from .models import Pokemon
 import random
 
 
-# ALL_STARTERS = [
-#     "Bulbasaur", "Charmander", "Squirtle",
-#     "Chikorita", "Cyndaquil", "Totodile",
-#     "Treecko", "Torchic", "Mudkip",
-#     "Turtwig", "Chimchar", "Piplup",
-#     "Snivy", "Tepig", "Oshawott",
-#     "Chespin", "Fennekin", "Froakie",
-#     "Rowlet", "Litten", "Popplio",
-#     "Grookey", "Scorbunny", "Sobble",
-#     "Sprigatito", "Fuecoco", "Quaxly"
-# ]
+ALL_STARTERS = [
+    "Bulbasaur", "Charmander", "Squirtle",
+    "Chikorita", "Cyndaquil", "Totodile",
+    "Treecko", "Torchic", "Mudkip",
+    "Turtwig", "Chimchar", "Piplup",
+    "Snivy", "Tepig", "Oshawott",
+    "Chespin", "Fennekin", "Froakie",
+    "Rowlet", "Litten", "Popplio",
+    "Grookey", "Scorbunny", "Sobble",
+    "Sprigatito", "Fuecoco", "Quaxly"
+]
 
 
 def index(request):
@@ -75,7 +75,7 @@ def dashboard(request):
     return render(request, 'home/dashboard.html')
 
 def marketplace(request):
-    pokemons = Pokemon.objects.order_by('poke_id')
+    pokemons = Pokemon.objects.order_by('id')
     return render(request, 'home/marketplace.html', {
         'pokemon_list': pokemons
     })

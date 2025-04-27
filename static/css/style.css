@@ -85,19 +85,47 @@ main {
 
 /*main body*/
 .section-hero {
-    background-color: #fdf5dc;
     display: flex;
     padding-top: 9.75rem;
     padding-bottom: 6rem;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.section-hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: #ff6b6b;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 80%;
+}
+
+
+.section-hero .cover-img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
 }
 
 .hero-content-wrapper {
     display: flex;
     justify-content: space-between;
     gap: 2rem;
+
+    position: relative;
+    z-index: 1;
 }
 
 .heading-xlarge {
@@ -119,6 +147,9 @@ main {
 .snorlax {
     height: 500px;
     width: 500px;
+
+    position: relative;
+    z-index: 2;
 }
 .cta-button {
     padding: 0.75rem 1.5rem;
@@ -281,5 +312,33 @@ footer a:hover {
 }
 
 
+/*marketplace*/
 
+.marketplace-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
 
+.pokemon-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 160px;
+    text-align: center;
+    background-color: #fafafa;
+}
+
+.pokemon-card-img {
+    width: 96px; height: 96px; object-fit: contain;
+}
+
+.pokemon-card-h2 {
+    font-size: 1.1rem; margin: 0.5rem 0;
+}
+
+.pokemon-card-p {
+    font-size: 0.9rem; margin: 0.25rem 0;
+}

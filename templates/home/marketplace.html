@@ -3,5 +3,29 @@
 <div class="container-medium" style="margin-top: 3rem; text-align: center;">
     <h1>Marketplace</h1>
     <p>Welcome to the Pokémon card marketplace. Browse and trade with other trainers!</p>
+
+    <div class="marketplace-grid">
+        {% for pokemon in pokemon_list %}
+        <div class="pokemon-card">
+            <img src="{{ pokemon.sprite }}"
+                 alt="{{ pokemon.name }} sprite"
+                 class="pokemon-card-img"
+            />
+
+            <h2 class="pokemon-card-h2">
+                {{ pokemon.name }}
+            </h2>
+
+            <p >
+                Type: {{ pokemon.types|join:", " }}
+            </p>
+            <p class="pokemon-card-p">
+                HP: {{ pokemon.health }}
+            </p>
+        </div>
+        {% empty %}
+        <p>No Pokémon found in the marketplace.</p>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

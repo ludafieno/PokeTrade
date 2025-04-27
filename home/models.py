@@ -23,3 +23,13 @@ class Profile(models.Model):
         return f"{self.user.username}'s profile"
 
 
+class Pokemon(models.Model):
+    poke_id     = models.PositiveIntegerField(unique=True, help_text="ID from PokéAPI")
+    name        = models.CharField(max_length=100)
+    sprite      = models.URLField(blank=True, null=True)
+    types       = models.JSONField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    health      = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"#{self.poke_id} {self.name}"

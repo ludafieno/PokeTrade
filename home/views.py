@@ -4,20 +4,22 @@ from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
+
+from .models import Pokemon
 import random
 
 
-ALL_STARTERS = [
-    "Bulbasaur", "Charmander", "Squirtle",
-    "Chikorita", "Cyndaquil", "Totodile",
-    "Treecko", "Torchic", "Mudkip",
-    "Turtwig", "Chimchar", "Piplup",
-    "Snivy", "Tepig", "Oshawott",
-    "Chespin", "Fennekin", "Froakie",
-    "Rowlet", "Litten", "Popplio",
-    "Grookey", "Scorbunny", "Sobble",
-    "Sprigatito", "Fuecoco", "Quaxly"
-]
+# ALL_STARTERS = [
+#     "Bulbasaur", "Charmander", "Squirtle",
+#     "Chikorita", "Cyndaquil", "Totodile",
+#     "Treecko", "Torchic", "Mudkip",
+#     "Turtwig", "Chimchar", "Piplup",
+#     "Snivy", "Tepig", "Oshawott",
+#     "Chespin", "Fennekin", "Froakie",
+#     "Rowlet", "Litten", "Popplio",
+#     "Grookey", "Scorbunny", "Sobble",
+#     "Sprigatito", "Fuecoco", "Quaxly"
+# ]
 
 
 def index(request):
@@ -73,7 +75,10 @@ def dashboard(request):
     return render(request, 'home/dashboard.html')
 
 def marketplace(request):
-    return render(request, 'home/marketplace.html')
+    pokemons = Pokemon.objects.order_by('poke_id')
+    return render(request, 'home/marketplace.html', {
+        'pokemon_list': pokemons
+    })
 
 def collection(request):
     return render(request, 'home/collection.html')

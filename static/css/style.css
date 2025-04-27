@@ -20,10 +20,12 @@ main {
 
 
 .navbar {
+    /*background-color: #fffaf0;*/
     inset: 0% 0% auto;
     z-index: 997;
     display: flex;
     padding-top: 1.5rem;
+    padding-bottom: 0.875rem;
     align-items: center;
 }
 
@@ -83,7 +85,7 @@ main {
 
 /*main body*/
 .section-hero {
-    background-color: #fffaf0;
+    background-color: #fdf5dc;
     display: flex;
     padding-top: 9.75rem;
     padding-bottom: 6rem;
@@ -154,7 +156,6 @@ footer a:hover {
 }
 
 .register-form {
-    margin-top: 2rem;
     padding: 2rem;
     background-color: #fafafa;
     border-radius: 8px;
@@ -162,8 +163,7 @@ footer a:hover {
     max-width: 500px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: box-shadow 0.3s ease;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 2rem auto;
 }
 
 .register-form input {

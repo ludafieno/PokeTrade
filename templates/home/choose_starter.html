@@ -1,18 +1,30 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container-medium" style="text-align: center; margin-top: 3rem;">
-    <h2>Choose Your Starter Pokémon</h2>
-    <form method="post">
-        {% csrf_token %}
-        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
-            {% for pokemon in starters %}
-            <button type="submit" name="starter" value="{{ pokemon }}" style="background: none; border: none;">
-                <img src="https://img.pokemondb.net/artwork/{{ pokemon|lower }}.jpg"
-                     alt="{{ pokemon }}" style="width: 150px; border-radius: 10px;">
-                <p><strong>{{ pokemon|capfirst }}</strong></p>
-            </button>
-            {% endfor %}
+  <h2>Choose Your Starter Pokémon</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+      {% for p in starters %}
+      <button type="submit" name="starter" value="{{ p.poke_id }}"
+              style="background: none; border: none; cursor: pointer;">
+        {% if p.sprite %}
+        <img src="{{ p.sprite }}" alt="{{ p.name }}"
+             style="width: 150px; border-radius: 10px;">
+        {% else %}
+        <div style="width:150px; height:150px; background:#eee;
+                    display:flex; align-items:center; justify-content:center;
+                    border-radius:10px;">
+          No Image
         </div>
-    </form>
+        {% endif %}
+        <p style="margin: 0.5rem 0; font-weight:bold;">{{ p.name }}</p>
+        <p style="margin: 0; font-size:0.85rem;">HP: {{ p.health }}</p>
+      </button>
+      {% endfor %}
+    </div>
+  </form>
 </div>
 {% endblock %}

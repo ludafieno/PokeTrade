@@ -104,19 +104,19 @@ main {
     background-color: #ff6b6b;
     z-index: 1;
     pointer-events: none;
-    opacity: 80%;
+    opacity: 85%;
 }
 
 
 .section-hero .cover-img {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
 }
 
 .hero-content-wrapper {

@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Report
-from .models import Pokemon
+from .models import Profile, Pokemon, Report
+from django import forms
 
 from .utils import fetch_pokemon
 
@@ -24,4 +24,21 @@ class PokemonAdmin(admin.ModelAdmin):
 
 admin.site.register(Report)
 
-# Register your models here.
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+    def clean_starter_pokemon(self):
+        val = self.cleaned_data.get('starter_pokemon')
+        # Convert empty ('') to None so the field can accept it
+        if val in (None, ''):
+            return None
+        return val
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    form = ProfileForm
+    list_display = ['user']
+    filter_horizontal = ('collection',)

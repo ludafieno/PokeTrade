@@ -63,7 +63,6 @@ class Profile(models.Model):
     currency = models.IntegerField(default=1000)
     daily_reward = models.DateField(default=timezone.now)
     bio = models.TextField(blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"

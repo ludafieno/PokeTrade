@@ -84,19 +84,11 @@
   </div>
 
   <!-- Pokémon grid -->
-  <h2 style="margin-top:2rem;">Your Pokémon</h2>
-  <div class="marketplace-grid" style="
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        margin-top: 1rem;
-    ">
-    {% for p in pokemons %}
-      {% if p.poke_id <= 151 %}
-        <a href="{% url 'pokemon_detail' p.id %}" style="text-decoration: none; color: inherit;">
-      {% else %}
-        <div>
-      {% endif %}
+      <h2 style="margin-top:2rem;">Your Pokémon</h2>
+    <div class="marketplace-grid" style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem;">
+      {% for p in pokemons %}
+        <a href="{% url 'pokemon_detail' p.id %}"
+           style="text-decoration: none; color: inherit;">
           <div class="pokemon-card">
             <img src="{{ p.sprite }}"
                  alt="{{ p.name }}"
@@ -105,14 +97,10 @@
             <p>Type: {{ p.types|join:", " }}</p>
             <p>HP: {{ p.health }}</p>
           </div>
-      {% if p.poke_id <= 151 %}
         </a>
-      {% else %}
-        </div>
-      {% endif %}
-    {% empty %}
-      <p>You haven’t collected any Pokémon yet.</p>
-    {% endfor %}
-  </div>
+      {% empty %}
+        <p>You haven’t collected any Pokémon yet.</p>
+      {% endfor %}
+    </div>
 </div>
 {% endblock %}

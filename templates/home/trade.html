@@ -1,49 +1,78 @@
+{# templates/home/trade.html #}
 {% extends 'base.html' %}
-
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-    <div style="background-color: #f8f8f8; padding: 30px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); width: 400px; text-align: center;">
-        <h2 style="margin-bottom: 20px;">Offer a Trade 🤝</h2>
+<div class="container-medium" style="margin:3rem auto; max-width:800px;">
 
-        <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
+  {# — Incoming Offers — #}
+  <h2>Incoming Trade Offers</h2>
+  {% if pending_offers %}
+    <ul style="list-style:none; padding:0; margin-bottom:2rem;">
+      {% for offer in pending_offers %}
+        <li style="border:1px solid #ddd; border-radius:8px; padding:1rem; margin-bottom:1rem;">
+          <p>
+            <strong>{{ offer.sender.username }}</strong>
+            offers <strong>{{ offer.offered_pokemon.name }}</strong>
+            for your <strong>{{ offer.requested_pokemon.name }}</strong>
+          </p>
+          <form method="post"
+                action="{% url 'respond_trade' offer.id %}"
+                style="display:inline-block; margin-top:0.5rem;">
             {% csrf_token %}
-            {{ form.as_p }}
+            <button type="submit" name="action" value="accept" class="cta-button" style="margin-right:0.5rem;">✅ Accept</button>
+            <button type="submit" name="action" value="reject" class="cta-button">❌ Reject</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p style="margin-bottom:2rem;">No incoming trade offers.</p>
+  {% endif %}
 
-            <button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
-                Send Trade Offer
-            </button>
-        </form>
+  <hr style="margin:2rem 0;">
 
-        <a href="{% url 'dashboard' %}" style="margin-top: 15px; display: inline-block; text-decoration: none; color: #555;">⬅ Back to Dashboard</a>
+  {# — Offer a Trade Form — #}
+  <div style="display:flex; justify-content:center; align-items:center; margin-bottom:2rem;">
+    <div style="background:#f8f8f8; padding:30px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); width:100%; max-width:400px; text-align:center;">
+      <h2 style="margin-bottom:20px;">Offer a Trade 🤝</h2>
+      <form method="post" style="display:flex; flex-direction:column; gap:15px;">
+        {% csrf_token %}
+        {{ form.offered_pokemon }}<p>FOR</p>{{ form.requested_pokemon }}
+        <button type="submit" class="cta-button" style="background-color:#4CAF50; color:#fff; border:none; padding:10px; border-radius:5px; cursor:pointer;">
+          Send Trade Offer (50 ⚪️)
+        </button>
+      </form>
+      <p style="margin-top:15px;">
+        <a href="{% url 'dashboard' %}" style="text-decoration:none; color:#555;">⬅ Back to Dashboard</a>
+      </p>
     </div>
-</div>
+  </div>
 
-<div style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
-    <h2>Your Trade History</h2>
-    {% if trade_history %}
-        <ul style="list-style: none; padding: 0;">
-            {% for trade in trade_history %}
-                <li style="border-bottom: 1px solid #ccc; padding: 1rem 0;">
-                    <p><strong>Date:</strong> {{ trade.created_at|date:"M d, Y - H:i" }}</p>
-                    <p>
-                        <strong>{{ trade.sender.username }}</strong>
-                        offered <strong>{{ trade.offered_pokemon.name }}</strong> to
-                        <strong>{{ trade.receiver.username }}</strong>
-                        for <strong>{{ trade.requested_pokemon.name }}</strong>
-                    </p>
-                    <p>Status:
-                        {% if trade.is_accepted %}
-                            <span style="color: green;"><strong>Accepted</strong></span>
-                        {% else %}
-                            <span style="color: orange;"><strong>Pending</strong></span>
-                        {% endif %}
-                    </p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p style="margin-top: 1rem;">You haven’t participated in any trades yet.</p>
-    {% endif %}
+  <hr style="margin:2rem 0;">
+
+  {# — My Trade History — #}
+  <h2>Your Trade History</h2>
+  {% if trade_history %}
+    <ul style="list-style:none; padding:0;">
+      {% for t in trade_history %}
+        <li style="border-bottom:1px solid #ccc; padding:1rem 0;">
+          <p><strong>Date:</strong> {{ t.created_at|date:"M d, Y - H:i" }}</p>
+          <p>
+            <strong>{{ t.sender.username }}</strong> → <strong>{{ t.receiver.username }}</strong><br/>
+            {{ t.offered_pokemon.name }} ⇄ {{ t.requested_pokemon.name }}
+          </p>
+          <p>Status:
+            {% if t.is_accepted %}
+              <span style="color:green;"><strong>Accepted</strong></span>
+            {% else %}
+              <span style="color:orange;"><strong>Pending</strong></span>
+            {% endif %}
+          </p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You haven’t participated in any trades yet.</p>
+  {% endif %}
+
 </div>
 {% endblock %}
-

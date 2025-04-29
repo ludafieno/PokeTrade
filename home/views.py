@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.urls import reverse
 
 from .models import Pokemon, Profile, Listing
 from collections import Counter
@@ -19,6 +20,8 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 from django.views.decorators.http import require_POST
+
+COST = 50
 
 ALL_STARTERS = [
     1, 4, 7,
@@ -189,32 +192,68 @@ def collection(request):
 
 @login_required
 def trade(request):
+    profile = request.user.profile
+
+    # incoming offers for me
+    pending_offers = Trade.objects.filter(
+        receiver=request.user,
+        is_accepted=False
+    ).order_by('-created_at')
+
+    # overall history
+    trade_history = Trade.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).order_by('-created_at')
+
     if request.method == 'POST':
         form = TradeForm(request.POST)
         if form.is_valid():
-            trade = form.save(commit=False)
-            trade.sender = request.user
-            trade.save()
+            offered = form.cleaned_data['offered_pokemon']
+            requested = form.cleaned_data['requested_pokemon']
 
-            profile = request.user.profile
-            if profile.currency >= 50:
-                profile.currency -= 50
+            # who’s the receiver?
+            receiver_profile = requested.owner
+            if receiver_profile.user == request.user:
+                messages.error(request, "You already own that card!")
+                return redirect('trade')
+
+            if profile.currency < COST:
+                messages.error(request, f"🛑 You need {COST} PokéCoins to send a trade.")
+                return redirect('trade')
+
+            # do it all in one transaction
+            with transaction.atomic():
+                # 1) Deduct fee
+                profile.currency -= COST
                 profile.save()
-            else:
 
-                trade.delete()
-                return HttpResponse("Not enough coins to send a trade!")
+                # 2) Create the trade
+                trade = form.save(commit=False)
+                trade.sender   = request.user
+                trade.receiver = receiver_profile.user
+                trade.save()
 
+            messages.success(
+                request,
+                f"✅ Trade sent to {receiver_profile.user.username}! {COST} ⚪️ deducted."
+            )
             return redirect('dashboard')
+
     else:
         form = TradeForm()
 
-    form.fields['offered_pokemon'].queryset = request.user.profile.collection.all()
-    form.fields['requested_pokemon'].queryset = Pokemon.objects.exclude(owners=request.user.profile)
+    # limit dropdowns
+    form.fields['offered_pokemon'].queryset = profile.collection.all()
+    form.fields['requested_pokemon'].queryset = Pokemon.objects.exclude(
+        owner=profile
+    )
 
-    trade_history = Trade.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-created_at')
+    return render(request, 'home/trade.html', {
+        'form':           form,
+        'pending_offers': pending_offers,
+        'trade_history':  trade_history,
+    })
 
-    return render(request, 'home/trade.html', {'form': form})
 
 def pending_trades(request):
     pending = Trade.objects.filter(receiver=request.user, is_accepted=False)
@@ -242,7 +281,7 @@ def respond_trade(request, trade_id):
     elif action == "reject":
         trade.delete()
 
-    return redirect('pending_trades')
+    return redirect('collection')
 
 @login_required
 def report_issue(request):

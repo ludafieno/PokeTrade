@@ -16,6 +16,9 @@
                     <div class="nav-left">
                     </div>
                     <div class="nav-middle">
+                         {% if user.is_authenticated %}
+                          <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+                        {% endif %}
                     </div>
                     <div class="nav-right">
                         {% if user.is_authenticated %}

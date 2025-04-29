@@ -5,7 +5,7 @@ from .models import Trade, Profile
 class TradeForm(forms.ModelForm):
     class Meta:
         model = Trade
-        fields = ['receiver', 'offered_pokemon', 'requested_pokemon']
+        fields = ['offered_pokemon', 'requested_pokemon']
 
 
 class ProfileForm(forms.ModelForm):

@@ -1,18 +1,33 @@
-<h2>Incoming Trade Offers</h2>
-{% if pending %}
-  <ul>
-    {% for trade in pending %}
-      <li>
-        {{ trade.sender.username }} offered {{ trade.offered_pokemon.name }}
-        for your {{ trade.requested_pokemon.name }}
-        <form method="post" action="{% url 'respond_trade' trade.id %}">
+{% extends 'base.html' %}
+{% block content %}
+<div class="pending-trades-container">
+  <h1>Incoming Trade Offers</h1>
+  {% for t in pending %}
+    <div class="trade-card">
+      <div class="trade-details">
+        <img src="{{ t.offered_pokemon.sprite }}"
+             alt="{{ t.offered_pokemon.name }}"
+             class="trade-pic"/>
+        <div>
+          <p><strong>{{ t.sender.username }}</strong> offers
+             <strong>{{ t.offered_pokemon.name }}</strong>
+             for your <strong>{{ t.requested_pokemon.name }}</strong>.</p>
+          <small>Requested at {{ t.created_at|date:"M j, Y H:i" }}</small>
+        </div>
+      </div>
+      <div class="trade-actions">
+        <form method="post" action="{% url 'respond_trade' t.id %}" style="display:inline;">
           {% csrf_token %}
-          <button name="action" value="accept">✅ Accept</button>
-          <button name="action" value="reject">❌ Reject</button>
+          <button name="action" value="accept" class="cta-button">✅ Accept</button>
         </form>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No trade offers right now.</p>
-{% endif %}
+        <form method="post" action="{% url 'respond_trade' t.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button name="action" value="reject" class="cta-button">❌ Reject</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <p>No incoming trades at the moment.</p>
+  {% endfor %}
+</div>
+{% endblock %}

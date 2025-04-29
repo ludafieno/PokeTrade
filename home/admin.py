@@ -10,36 +10,33 @@ from .utils import fetch_pokemon
 @admin.register(Pokemon)
 class PokemonAdmin(admin.ModelAdmin):
     list_display    = ('poke_id','name','owner')
-    fields          = ('owner','poke_id','name','sprite','types',
-                       'description','health','attack','defense',
-                       'special_attack','special_defense','speed')
-    readonly_fields = ('name','sprite','types','description',
-                       'health','attack','defense',
-                       'special_attack','special_defense','speed')
+    fields          = (
+        'owner','poke_id','name','sprite','types','description',
+        'health','attack','defense','special_attack','special_defense','speed'
+    )
+    # only keep the API‐derived fields read‐only
+    readonly_fields = ('name','sprite','types','description')
 
     def save_model(self, request, obj, form, change):
         # whenever it's new or you change poke_id, re-fetch everything
         if not change or 'poke_id' in form.changed_data:
             data = fetch_pokemon(obj.poke_id)
+            stat_map = { s['stat']['name']: s['base_stat'] for s in data['stats'] }
 
-            # build a lookup: stat_name -> base_stat
-            stat_map = {
-                stat_block['stat']['name']: stat_block['base_stat']
-                for stat_block in data['stats']
-            }
-
-            # assign each field
             obj.name            = data['name']
             obj.sprite          = data['sprite']
             obj.types           = data['types']
             obj.description     = data['description']
 
+            # now you _can_ override these in the form if you like:
             obj.health          = stat_map.get('hp', 0)
             obj.attack          = stat_map.get('attack', 0)
             obj.defense         = stat_map.get('defense', 0)
             obj.special_attack  = stat_map.get('special-attack', 0)
             obj.special_defense = stat_map.get('special-defense', 0)
             obj.speed           = stat_map.get('speed', 0)
+
+        super().save_model(request, obj, form, change)
 
         old_owner = None
         if change:

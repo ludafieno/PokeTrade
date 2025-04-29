@@ -67,18 +67,20 @@ def choose_starter(request):
             if pid in starter_ids:
                 profile = get_object_or_404(Profile, user=request.user)
 
-                # 2) Fetch the up-to-date data from the API
                 data = fetch_pokemon(pid)
-
-                # 3) Create a brand-new card for this user
                 new_card = Pokemon.objects.create(
-                    owner      = profile,
-                    poke_id    = pid,
-                    name       = data['name'],
-                    sprite     = data['sprite'],
-                    types      = data['types'],
-                    description= data['description'],
-                    health     = data['health']
+                    owner=profile,
+                    poke_id=data['poke_id'],
+                    name=data['name'],
+                    sprite=data['sprite'],
+                    types=data['types'],
+                    description=data['description'],
+                    health=data['hp'],
+                    attack=data['attack'],
+                    defense=data['defense'],
+                    special_attack=data['sp_attack'],
+                    special_defense=data['sp_defense'],
+                    speed=data['speed'],
                 )
 
                 # 4) (Still) add it to the M2M for backward compatibility

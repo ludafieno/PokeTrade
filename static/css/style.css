@@ -1,3 +1,14 @@
+:root {
+    --primary-color: #EFBF04;
+    --primary-hover: #d0a500;
+    --accent-red: #d9534f;
+    --accent-red-hover: #c9302c;
+    --text-dark: #333;
+    --text-light: #777;
+    --background: #fff;
+}
+
+
 * {
     margin: 0;
     padding: 0;
@@ -52,7 +63,7 @@ main {
     justify-content: space-between;
     border-radius: 0.5rem;
     /*background-color: rgb(20, 20, 20);*/
-    background-color: #EFBF04;
+    background-color: var(--primary-color);
 }
 
 .logo {
@@ -153,7 +164,8 @@ main {
 }
 .cta-button {
     padding: 0.75rem 1.5rem;
-    background-color: #EFBF04;
+    background-color: var(--primary-color);
+
     color: #000;
     font-weight: bold;
     text-decoration: none;
@@ -284,8 +296,10 @@ footer a:hover {
 }
 
 .logout-section {
-    margin-top: 3rem;
+    margin-top: 4rem;
+    text-align: center;
 }
+
 
 .logout-btn {
     padding: 0.75rem 1.5rem;
@@ -323,22 +337,47 @@ footer a:hover {
 }
 
 .pokemon-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
     padding: 1rem;
-    width: 160px;
+    width: 180px;
     text-align: center;
-    background-color: #fafafa;
+    background-color: #ffffff;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.pokemon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.pokemon-card img {
+    transition: transform 0.3s ease;
+}
+
+.pokemon-card img:hover {
+    transform: scale(1.05);
 }
 
 .pokemon-card-img {
-    width: 96px; height: 96px; object-fit: contain;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
 }
 
 .pokemon-card-h2 {
-    font-size: 1.1rem; margin: 0.5rem 0;
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    font-weight: 600;
+    color: var(--text-dark);
 }
 
 .pokemon-card-p {
-    font-size: 0.9rem; margin: 0.25rem 0;
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+    color: var(--text-light);
 }
+

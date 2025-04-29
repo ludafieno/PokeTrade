@@ -36,6 +36,19 @@ class Profile(models.Model):
         related_name="owners",
         help_text="All Pokémon this user owns"
     )
+    currency = models.IntegerField(default=1000)
 
     def __str__(self):
         return f"{self.user.username}'s profile"
+
+
+class Trade(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_trades")
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_trades")
+    offered_pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="offered_in_trades")
+    requested_pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="requested_in_trades")
+    is_accepted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Trade from {self.sender.username} to {self.receiver.username}"

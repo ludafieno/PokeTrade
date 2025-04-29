@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, resolve_url, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout
@@ -5,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
 
+from .forms import TradeForm
 from .models import Pokemon, Profile
 from collections import Counter
 import random
@@ -135,8 +137,32 @@ def collection(request):
         'pokemons': pokemons,
     })
 
+@login_required
 def trade(request):
-    return render(request, 'home/trade.html')
+    if request.method == 'POST':
+        form = TradeForm(request.POST)
+        if form.is_valid():
+            trade = form.save(commit=False)
+            trade.sender = request.user
+            trade.save()
+
+            profile = request.user.profile
+            if profile.currency >= 50:
+                profile.currency -= 50
+                profile.save()
+            else:
+
+                trade.delete()
+                return HttpResponse("Not enough coins to send a trade!")
+
+            return redirect('dashboard')
+    else:
+        form = TradeForm()
+
+    form.fields['offered_pokemon'].queryset = request.user.profile.collection.all()
+    form.fields['requested_pokemon'].queryset = Pokemon.objects.exclude(owners=request.user.profile)
+
+    return render(request, 'home/trade.html', {'form': form})
 
 @login_required
 def report_issue(request):

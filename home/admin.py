@@ -41,28 +41,44 @@ class PokemonAdmin(admin.ModelAdmin):
             obj.special_defense = stat_map.get('special-defense', 0)
             obj.speed           = stat_map.get('speed', 0)
 
+        old_owner = None
+        if change:
+            old_owner = Pokemon.objects.get(pk=obj.pk).owner
+
         super().save_model(request, obj, form, change)
 
-admin.site.register(Report)
+        # 3) Sync the M2M on the new owner
+        if obj.owner:
+            obj.owner.collection.add(obj)
+
+        # 4) If owner changed, remove from the old owner's collection
+        if old_owner and old_owner != obj.owner:
+            old_owner.collection.remove(obj)
+
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ('reporter', 'report_type', 'created_at')
+    list_filter  = ('report_type',)
 
 
-class ProfileForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = '__all__'
+# class ProfileForm(forms.ModelForm):
+#     class Meta:
+#         model = Profile
+#         fields = '__all__'
+#
+#     def clean_starter_pokemon(self):
+#         val = self.cleaned_data.get('starter_pokemon')
+#         # Convert empty ('') to None so the field can accept it
+#         if val in (None, ''):
+#             return None
+#         return val
 
-    def clean_starter_pokemon(self):
-        val = self.cleaned_data.get('starter_pokemon')
-        # Convert empty ('') to None so the field can accept it
-        if val in (None, ''):
-            return None
-        return val
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    form = ProfileForm
-    list_display = ['user']
+    list_display = ('user', 'currency', 'daily_reward')
     filter_horizontal = ('collection',)
+    exclude = ('pokemons',)
 
 @admin.register(Trade)
 class TradeAdmin(admin.ModelAdmin):

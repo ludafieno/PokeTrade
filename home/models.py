@@ -112,7 +112,13 @@ class Listing(models.Model):
     created_at  = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["price"]   # cheapest first
+        ordering = ["price"]
+        constraints = [
+            models.UniqueConstraint(
+                fields = ["pokemon"],
+                name = "unique_listing_per_pokemon"
+            )
+        ]
 
     def __str__(self):
         return f"{self.pokemon.name} for {self.price} coins"

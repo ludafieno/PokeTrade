@@ -1,13 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
   <div class="container-medium" style="margin-top:3rem;">
+
     <h1>Marketplace</h1>
+
+    <!-- filter bar -->
+    <form method="get" style="margin-bottom:1rem; display:flex; gap:0.5rem; align-items:center;">
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search by name…"
+        style="padding:0.5rem; flex:1;"
+      />
+
+      <select name="type" style="padding:0.5rem;">
+        <option value="">All Types</option>
+        {% for t in type_choices %}
+          <option value="{{ t }}" {% if t == filter_ty %}selected{% endif %}>
+            {{ t|capfirst }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" class="cta-button" style="padding:0.5rem 1rem;">
+        Filter
+      </button>
+    </form>
+
     <div class="marketplace-grid">
       {% for listing in listings %}
         <div class="pokemon-card">
           <img src="{{ listing.pokemon.sprite }}" class="pokemon-card-img"/>
-          <h2>{{ listing.pokemon.name }}</h2>
-          <p>Type: {{ listing.pokemon.types|join:', ' }}</p>
+          <h2>#{{ listing.pokemon.poke_id }} {{ listing.pokemon.name }}</h2>
+          <p>Type: {{ listing.pokemon.types|join:", " }}</p>
           <p>HP:   {{ listing.pokemon.health }}</p>
           <p><strong>Price: {{ listing.price }} ⚪️</strong></p>
 
@@ -23,7 +49,7 @@
           {% endif %}
         </div>
       {% empty %}
-        <p>No Pokémon listed yet.</p>
+        <p>No Pokémon match your filters.</p>
       {% endfor %}
     </div>
   </div>

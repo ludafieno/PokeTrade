@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container-medium" style="margin-top:3rem; text-align:center;">
-
+<div class="container-medium" style="margin-top:3rem; text-align:center; margin-bottom:3rem;">
   <h1>#{{ pokemon.poke_id }} {{ pokemon.name }}</h1>
-  <img src="{{ pokemon.sprite }}"
-       alt="{{ pokemon.name }}"
-       style="width: 120px; height: 120px; object-fit: contain; margin:1rem 0;">
+  <img
+    src="{{ pokemon.sprite }}"
+    alt="{{ pokemon.name }}"
+    style="width:120px; height:120px; object-fit:contain; margin:1rem 0;"
+  />
 
   <p><strong>Type:</strong> {{ pokemon.types|join:", " }}</p>
 
@@ -19,36 +20,58 @@
     {% endfor %}
   </div>
 
-  {# ——— Listing / Buy / Sell UI ——— #}
+  <!-- ——— Listing / Buy / Sell UI ——— -->
   {% if user.is_authenticated %}
     {% if pokemon.owner == user.profile %}
-      {# I own this Pokémon — show “List for sale” form #}
-      <form method="post" action="{% url 'create_listing' pokemon.pk %}">
+      {# I own this card: show list-for-sale form #}
+      <form
+        method="post"
+        action="{% url 'create_listing' pokemon.id %}"
+        style="margin-top:1.5rem;"
+      >
         {% csrf_token %}
-        <input type="number" name="price" step="0.01" min="1"
-               placeholder="Price (e.g. 123.45)" required>
-        <button type="submit" class="cta-button">List for Sale</button>
+        <input
+          type="number"
+          name="price"
+          step="0.01"
+          min="1"
+          placeholder="Price (e.g. 123.45)"
+          required
+          style="padding:0.5rem; width:150px;"
+        />
+        <button type="submit" class="cta-button" style="margin-left:0.5rem;">
+          List for Sale
+        </button>
       </form>
 
     {% else %}
-      {# Someone else owns it — see if it’s listed #}
+      {# Someone else owns it: check for an existing listing #}
       {% with pokemon.listings.first as listing %}
         {% if listing %}
-          <h3>Listed for {{ listing.price }} ⚪️</h3>
-          <form method="post" action="{% url 'buy_listing' listing.pk %}">
+          <h3 style="margin-top:1.5rem;">
+            Listed for {{ listing.price }} ⚪️
+          </h3>
+          <form
+            method="post"
+            action="{% url 'buy_listing' listing.id %}"
+            style="margin-top:0.5rem;"
+          >
             {% csrf_token %}
-            <button type="submit" class="cta-button">Buy Now</button>
+            <button type="submit" class="cta-button">
+              Buy Now
+            </button>
           </form>
         {% else %}
-          <p>This Pokémon isn’t on the marketplace.</p>
+          <p style="margin-top:1.5rem;">This Pokémon isn’t on the marketplace.</p>
         {% endif %}
       {% endwith %}
     {% endif %}
   {% endif %}
 
   <p style="margin-top:2rem;">
-    <a href="{% url 'collection' %}" class="cta-button">🔙 Back to Collection</a>
+    <a href="{% url 'collection' %}" class="cta-button">
+      🔙 Back to Collection
+    </a>
   </p>
-
 </div>
 {% endblock %}

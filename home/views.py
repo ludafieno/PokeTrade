@@ -123,10 +123,33 @@ def about(request):
 def dashboard(request):
     return render(request, 'home/dashboard.html')
 
+
+@login_required  # or drop this if you want anonymous browsing too
 def marketplace(request):
-    listings = Listing.objects.select_related('pokemon', "seller").all()
+    qs = Listing.objects.select_related('pokemon', 'seller').all()
+
+    # pull the q= (name search) and type= GET params
+    q         = request.GET.get('q', '').strip()
+    filter_ty = request.GET.get('type', '').strip()
+
+    if q:
+        qs = qs.filter(pokemon__name__icontains=q)
+
+    if filter_ty:
+        # JSONField contains lookup; matches any listing whose pokemon.types list includes [filter_ty]
+        qs = qs.filter(pokemon__types__contains=[filter_ty])
+
+    # build a master list of every type currently listed for your dropdown
+    all_types = set()
+    for listing in Listing.objects.select_related('pokemon'):
+        for t in (listing.pokemon.types or []):
+            all_types.add(t)
+
     return render(request, 'home/marketplace.html', {
-        'listings': listings
+        'listings':     qs,
+        'type_choices': sorted(all_types),
+        'q':            q,
+        'filter_ty':    filter_ty,
     })
 
 def collection(request):
@@ -282,23 +305,37 @@ def update_profile(request):
     return render(request, 'home/update_profile.html', {'form': form})
 
 @login_required
-@require_POST
 def create_listing(request, pokemon_id):
-    profile = request.user.profile
-    pokemon = get_object_or_404(Pokemon, pk=pokemon_id, owner=profile)
-    price = Decimal(request.POST['price'])
-    Listing.objects.create(
-        pokemon=pokemon,
-        seller=profile,
-        price=price
-    )
-    messages.success(request, f"{pokemon.name} is now listed for {price} coins!")
-    return redirect('pokemon_detail', pokemon_id=pokemon_id)
+    profile = Profile.objects.get(user=request.user)
+    # make sure this card really belongs to them
+    card = get_object_or_404(Pokemon, pk=pokemon_id, owner=profile)
 
+    # if they already have an active listing for *this* row, stop
+    if Listing.objects.filter(pokemon=card).exists():
+        messages.warning(request,
+            "You’re already selling this exact card. "
+            "If you want to change the price, please cancel or update your existing listing."
+        )
+        return redirect('collection')
+
+    if request.method == 'POST':
+        price = request.POST.get('price')  # or use a small Form
+        Listing.objects.create(
+            pokemon=card,
+            seller=profile,
+            price=price
+        )
+        messages.success(request, f"{card.name} has been listed for {price} PokéCoins!")
+        return redirect('collection')
+
+    # if GET, render a small form (or just redirect)
+    return render(request, 'home/pokemon_detail.html', {
+        'pokemon': card,
+    })
 @login_required
 @require_POST
 def buy_listing(request, listing_id):
-    buyer = request.user.profile
+    buyer = Profile.objects.get(user=request.user)
     listing = get_object_or_404(Listing, pk=listing_id)
     if buyer.currency < listing.price:
         messages.error(request, "Not enough PokéCoins!")
@@ -318,4 +355,4 @@ def buy_listing(request, listing_id):
         buyer.collection.add(p)
         listing.delete()
         messages.success(request, f"You bought {p.name} for {listing.price} coins!")
-    return redirect('pokemon_detail', pokemon_id=listing.pokemon.pk)
+    return redirect('dashboard')

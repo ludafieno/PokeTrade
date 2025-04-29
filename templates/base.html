@@ -16,8 +16,9 @@
                     <div class="nav-left">
                     </div>
                     <div class="nav-middle">
+                        <a href="https://reindeer-polygon-r93s.squarespace.com/about-1" class="nav-link">About</a>
                          {% if user.is_authenticated %}
-                          <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+                            <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
                         {% endif %}
                     </div>
                     <div class="nav-right">

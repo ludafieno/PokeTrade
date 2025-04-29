@@ -51,56 +51,74 @@
       enctype="multipart/form-data"
       id="avatar-form"
       style="margin-top: 0.5rem; text-align: center;">
-  {% csrf_token %}
-  {% if form.errors %}
-    <div style="color:red; font-size:0.9rem;">
-      {{ form.errors.avatar }}
-    </div>
-  {% endif %}
-  <input
-    type="file"
-    name="avatar"
-    id="avatar-input"
-    style="display: none;"
-    onchange="document.getElementById('avatar-form').submit()"
-  >
+        {% csrf_token %}
+        {% if form.errors %}
+          <div style="color:red; font-size:0.9rem;">
+            {{ form.errors.avatar }}
+          </div>
+        {% endif %}
+        <input
+          type="file"
+          name="avatar"
+          id="avatar-input"
+          style="display: none;"
+          onchange="document.getElementById('avatar-form').submit()"
+        >
 
-  <!-- Label acts as the clickable button -->
-  <label
-    for="avatar-input"
-    class="cta-button"
-    style="
-      padding: 0.3rem 0.6rem;
-      font-size: 0.8rem;
-      margin-top: 0.5rem;
-      display: inline-block;
-      cursor: pointer;
-    "
-  >
-    Change Picture
-  </label>
-</form>
+        <!-- Label acts as the clickable button -->
+        <label
+          for="avatar-input"
+          class="cta-button"
+          style="
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: inline-block;
+            cursor: pointer;
+          "
+        >
+          Change Picture
+        </label>
+      </form>
+
+      {# ← NEW Delete Account button ↓ #}
+      <div style="margin-top:0.75rem;">
+        <a
+          href="{% url 'delete_account' %}"
+          class="cta-button"
+          style="
+            background-color: #e74c3c;
+            color: white;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            display: inline-block;
+          "
+        >
+          Delete Account
+        </a>
+      </div>
+
     </div>
   </div>
 
   <!-- Pokémon grid -->
-      <h2 style="margin-top:2rem;">Your Pokémon</h2>
-    <div class="marketplace-grid" style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem;">
-      {% for p in pokemons %}
-        <a href="{% url 'pokemon_detail' p.id %}"
-           style="text-decoration: none; color: inherit;">
-          <div class="pokemon-card">
-            <img src="{{ p.sprite }}"
-                 alt="{{ p.name }}"
-                 style="width:96px; height:96px; object-fit:contain;">
-            <h3>#{{ p.poke_id }} {{ p.name }}</h3>
-            <p>Type: {{ p.types|join:", " }}</p>
-            <p>HP: {{ p.health }}</p>
-          </div>
-        </a>
-      {% empty %}
-        <p>You haven’t collected any Pokémon yet.</p>
-      {% endfor %}
-    </div>
+  <h2 style="margin-top:2rem;">Your Pokémon</h2>
+  <div class="marketplace-grid" style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem;">
+    {% for p in pokemons %}
+      <a href="{% url 'pokemon_detail' p.id %}"
+         style="text-decoration: none; color: inherit;">
+        <div class="pokemon-card">
+          <img src="{{ p.sprite }}"
+               alt="{{ p.name }}"
+               style="width:96px; height:96px; object-fit:contain;">
+          <h3>#{{ p.poke_id }} {{ p.name }}</h3>
+          <p>Type: {{ p.types|join:", " }}</p>
+          <p>HP: {{ p.health }}</p>
+        </div>
+      </a>
+    {% empty %}
+      <p>You haven’t collected any Pokémon yet.</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

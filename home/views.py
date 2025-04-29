@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
 
-from .forms import TradeForm
+from .forms import TradeForm, ProfileForm
 from .models import Pokemon, Profile
 from collections import Counter
 import random
@@ -122,7 +122,16 @@ def marketplace(request):
     })
 
 def collection(request):
-    profile = request.user.profile
+    profile = Profile.objects.get(user=request.user)
+    if request.method == 'POST' and 'avatar' in request.FILES:
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            print("Saved avatar to:", profile.avatar.path)
+            return redirect('collection')
+    else:
+        form = ProfileForm(instance=profile)
+
     pokemons = profile.collection.all()
     total = pokemons.count()
 
@@ -132,6 +141,8 @@ def collection(request):
     fav_type = fav[0][0] if fav else "None"
 
     return render(request, 'home/collection.html', {
+        'profile': profile,
+        'form': form,
         'total': total,
         'fav_type': fav_type,
         'pokemons': pokemons,

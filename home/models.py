@@ -1,5 +1,16 @@
 from django.db import models
+import os, uuid
 from django.contrib.auth.models import User
+
+def avatar_upload_to(instance, filename):
+    """
+    Generate a short, unique filename for user avatars.
+    e.g. avatars/alice_6f1d2f3a4b5c6d7e8f9a.png
+    """
+    ext = filename.split('.')[-1].lower()
+    # use username + random hex to avoid clashes
+    new_name = f"{instance.user.username}_{uuid.uuid4().hex}.{ext}"
+    return os.path.join('avatars', new_name)
 
 class Report(models.Model):
     REPORT_TYPES = [
@@ -30,6 +41,13 @@ class Pokemon(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(
+        upload_to=avatar_upload_to,
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Upload a profile picture'
+    )
     collection = models.ManyToManyField(
         Pokemon,
         blank=True,

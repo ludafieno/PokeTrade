@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h2>Update Your Profile</h2>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Update</button>
+</form>
+    <hr style="margin-top: 2rem;">
+
+<div style="text-align: center; margin-top: 1rem;">
+  <a href="{% url 'delete_account' %}" class="logout-btn" style="background-color: #f44336;">
+    🗑️ Delete My Account
+  </a>
+</div>
+
+{% endblock %}

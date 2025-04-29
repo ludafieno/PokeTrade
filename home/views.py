@@ -9,9 +9,15 @@ from django.core.mail import send_mail
 from .forms import TradeForm, ProfileForm
 from .models import Pokemon, Profile
 from collections import Counter
+from .forms import TradeForm, ProfileForm
+from .models import Pokemon, Profile, Trade
 import random
 
 from .utils import fetch_pokemon
+from django.utils import timezone
+from django.contrib import messages
+from django.db.models import Q
+from django.views.decorators.http import require_POST
 
 ALL_STARTERS = [
     1, 4, 7,
@@ -133,6 +139,13 @@ def collection(request):
         form = ProfileForm(instance=profile)
 
     pokemons = profile.collection.all()
+    sort_by = request.GET.get('sort', 'poke_id')  # default to pokedex number
+
+    if sort_by == 'name':
+        pokemons = profile.collection.all().order_by('name')
+    else:
+        pokemons = profile.collection.all().order_by('poke_id')
+
     total = pokemons.count()
 
     # Find favorite type
@@ -146,6 +159,7 @@ def collection(request):
         'total': total,
         'fav_type': fav_type,
         'pokemons': pokemons,
+        'sort_by': sort_by,
     })
 
 @login_required
@@ -173,7 +187,37 @@ def trade(request):
     form.fields['offered_pokemon'].queryset = request.user.profile.collection.all()
     form.fields['requested_pokemon'].queryset = Pokemon.objects.exclude(owners=request.user.profile)
 
+    trade_history = Trade.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-created_at')
+
     return render(request, 'home/trade.html', {'form': form})
+
+def pending_trades(request):
+    pending = Trade.objects.filter(receiver=request.user, is_accepted=False)
+    return render(request, 'home/pending_trades.html', {'pending': pending})
+
+@require_POST
+def respond_trade(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id, receiver=request.user)
+
+    action = request.POST.get("action")
+
+    if action == "accept":
+        sender_profile = trade.sender.profile
+        receiver_profile = trade.receiver.profile
+
+        trade.offered_pokemon.owners.remove(sender_profile)
+        trade.offered_pokemon.owners.add(receiver_profile)
+
+        trade.requested_pokemon.owners.remove(receiver_profile)
+        trade.requested_pokemon.owners.add(sender_profile)
+
+        trade.is_accepted = True
+        trade.save()
+
+    elif action == "reject":
+        trade.delete()
+
+    return redirect('pending_trades')
 
 @login_required
 def report_issue(request):
@@ -191,4 +235,32 @@ def report_issue(request):
 def logout_view(request):
     logout(request)
     return redirect('index')
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, "Your account has been deleted.")
+        return redirect('index')  # or wherever you want
+
+    return render(request, 'home/delete_account.html')
+
+def pokemon_detail(request, pokemon_id):
+    pokemon = get_object_or_404(Pokemon, id=pokemon_id)
+
+    # Create stat labels and values here
+    stats = [
+        ("HP", pokemon.health),
+        ("Attack", pokemon.attack),
+        ("Defense", pokemon.defense),
+        ("Sp. Attack", pokemon.special_attack),
+        ("Sp. Defense", pokemon.special_defense),
+        ("Speed", pokemon.speed)
+    ]
+
+    return render(request, 'home/pokemon_detail.html', {
+        'pokemon': pokemon,
+        'stats': stats,
+    })
 

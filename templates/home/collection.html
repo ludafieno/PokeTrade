@@ -1,6 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container-medium" style="margin-top:3rem;">
+  <h1>{{ request.user.username }}’s Collection</h1>
+  <p><strong>Total Pokémon:</strong> {{ total }}</p>
+  <p><strong>Favorite type:</strong> {{ fav_type }}</p>
+    <form method="get" style="margin: 1rem 0;">
+  <label for="sort"><strong>Sort by:</strong></label>
+  <select name="sort" id="sort" onchange="this.form.submit()">
+    <option value="poke_id" {% if sort_by == "poke_id" %}selected{% endif %}>Pokédex Number</option>
+    <option value="name" {% if sort_by == "name" %}selected{% endif %}>Name (A–Z)</option>
+  </select>
+    </form>
   <!-- Header: username, totals on the left; avatar + form on the right -->
   <div class="profile-header" style="
        display: flex;
@@ -84,14 +94,24 @@
         margin-top: 1rem;
     ">
     {% for p in pokemons %}
-      <div class="pokemon-card">
-        <img src="{{ p.sprite }}"
-             alt="{{ p.name }}"
-             style="width:96px; height:96px; object-fit:contain;">
-        <h3>#{{ p.poke_id }} {{ p.name }}</h3>
-        <p>Type: {{ p.types|join:", " }}</p>
-        <p>HP: {{ p.health }}</p>
-      </div>
+      {% if p.poke_id <= 151 %}
+        <a href="{% url 'pokemon_detail' p.id %}" style="text-decoration: none; color: inherit;">
+      {% else %}
+        <div>
+      {% endif %}
+          <div class="pokemon-card">
+            <img src="{{ p.sprite }}"
+                 alt="{{ p.name }}"
+                 style="width:96px; height:96px; object-fit:contain;">
+            <h3>#{{ p.poke_id }} {{ p.name }}</h3>
+            <p>Type: {{ p.types|join:", " }}</p>
+            <p>HP: {{ p.health }}</p>
+          </div>
+      {% if p.poke_id <= 151 %}
+        </a>
+      {% else %}
+        </div>
+      {% endif %}
     {% empty %}
       <p>You haven’t collected any Pokémon yet.</p>
     {% endfor %}

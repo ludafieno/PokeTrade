@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-medium" style="margin-top:3rem; text-align:center;">
+  <h1>#{{ pokemon.poke_id }} {{ pokemon.name }}</h1>
+  <img src="{{ pokemon.sprite }}" alt="{{ pokemon.name }}" style="width: 120px; height: 120px; object-fit: contain; margin: 1rem 0;">
+
+  <p><strong>Type:</strong> {{ pokemon.types|join:", " }}</p>
+
+  <!-- STAT BARS -->
+  <div style="max-width: 400px; margin: 2rem auto;">
+    {% for label, value in stats %}
+      <p><strong>{{ label }}:</strong> {{ value }}</p>
+      <div style="background:#ddd; border-radius:10px; overflow:hidden; height:20px; margin-bottom:10px;">
+        <div style="width:{{ value|floatformat:0 }}%; background:#4caf50; height:100%;"></div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <a href="{% url 'collection' %}" class="cta-button" style="margin-top: 2rem;">🔙 Back to Collection</a>
+</div>
+{% endblock %}

@@ -17,4 +17,33 @@
         <a href="{% url 'dashboard' %}" style="margin-top: 15px; display: inline-block; text-decoration: none; color: #555;">⬅ Back to Dashboard</a>
     </div>
 </div>
+
+<div style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <h2>Your Trade History</h2>
+    {% if trade_history %}
+        <ul style="list-style: none; padding: 0;">
+            {% for trade in trade_history %}
+                <li style="border-bottom: 1px solid #ccc; padding: 1rem 0;">
+                    <p><strong>Date:</strong> {{ trade.created_at|date:"M d, Y - H:i" }}</p>
+                    <p>
+                        <strong>{{ trade.sender.username }}</strong>
+                        offered <strong>{{ trade.offered_pokemon.name }}</strong> to
+                        <strong>{{ trade.receiver.username }}</strong>
+                        for <strong>{{ trade.requested_pokemon.name }}</strong>
+                    </p>
+                    <p>Status:
+                        {% if trade.is_accepted %}
+                            <span style="color: green;"><strong>Accepted</strong></span>
+                        {% else %}
+                            <span style="color: orange;"><strong>Pending</strong></span>
+                        {% endif %}
+                    </p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="margin-top: 1rem;">You haven’t participated in any trades yet.</p>
+    {% endif %}
+</div>
 {% endblock %}
+

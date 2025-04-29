@@ -1,0 +1,18 @@
+<h2>Incoming Trade Offers</h2>
+{% if pending %}
+  <ul>
+    {% for trade in pending %}
+      <li>
+        {{ trade.sender.username }} offered {{ trade.offered_pokemon.name }}
+        for your {{ trade.requested_pokemon.name }}
+        <form method="post" action="{% url 'respond_trade' trade.id %}">
+          {% csrf_token %}
+          <button name="action" value="accept">✅ Accept</button>
+          <button name="action" value="reject">❌ Reject</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No trade offers right now.</p>
+{% endif %}

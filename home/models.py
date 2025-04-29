@@ -1,6 +1,7 @@
 from django.db import models
 import os, uuid
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 def avatar_upload_to(instance, filename):
     """
@@ -34,6 +35,11 @@ class Pokemon(models.Model):
     types       = models.JSONField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     health      = models.IntegerField(default=0)
+    attack = models.IntegerField(null=True, blank=True)
+    defense = models.IntegerField(null=True, blank=True)
+    special_attack = models.IntegerField(null=True, blank=True)
+    special_defense = models.IntegerField(null=True, blank=True)
+    speed = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"#{self.poke_id} {self.name}"
@@ -55,6 +61,9 @@ class Profile(models.Model):
         help_text="All Pokémon this user owns"
     )
     currency = models.IntegerField(default=1000)
+    daily_reward = models.DateField(default=timezone.now)
+    bio = models.TextField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"
@@ -66,6 +75,7 @@ class Trade(models.Model):
     offered_pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="offered_in_trades")
     requested_pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="requested_in_trades")
     is_accepted = models.BooleanField(default=False)
+    is_approved_by_admin = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

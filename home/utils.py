@@ -3,17 +3,19 @@ import requests
 POKEAPI_BASE = "https://pokeapi.co/api/v2/pokemon"
 
 def fetch_pokemon(poke_id):
-    response = requests.get(f"{POKEAPI_BASE}/{poke_id}")
-    response.raise_for_status()
-    data = response.json()
+    url = f"https://pokeapi.co/api/v2/pokemon/{poke_id}/"
+    r = requests.get(url)
+    r.raise_for_status()
+    data = r.json()
 
-    species = requests.get(data['species']['url']).json()
+    # pull out a short flavor text too if you like…
+    desc_url = data['species']['url']
+    desc_data = requests.get(desc_url).json()
     desc = next(
-        (entry['flavor_text'].replace('\n', ' ')
-         for entry in species['flavor_text_entries']
-         if entry['language']['name'] == 'en'),
+        (x['flavor_text'] for x in desc_data['flavor_text_entries']
+         if x['language']['name']=='en'),
         ""
-    )
+    ).replace("\n"," ")
 
     return {
         'poke_id':     data['id'],
@@ -21,5 +23,6 @@ def fetch_pokemon(poke_id):
         'sprite':      data['sprites']['front_default'],
         'types':       [t['type']['name'].capitalize() for t in data['types']],
         'description': desc,
-        'health':      data['stats'][0]['base_stat'],  # HP stat
+        # base_stat list for all stats:
+        'stats':       data['stats'],
     }

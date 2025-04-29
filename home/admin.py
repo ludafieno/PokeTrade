@@ -1,25 +1,46 @@
 from django.contrib import admin
-from .models import Profile, Pokemon, Report, Trade
-from django import forms
+from django.shortcuts import get_object_or_404
 
+from .models import Profile, Pokemon, Report, Trade, Listing
+from django import forms
+from django.contrib import admin
 from .utils import fetch_pokemon
 
 
 @admin.register(Pokemon)
 class PokemonAdmin(admin.ModelAdmin):
-    list_display    = ('poke_id', 'name')
-    fields          = ('poke_id','name','sprite','types','description','health')
-    readonly_fields = ('name','sprite','types','description','health')
+    list_display    = ('poke_id','name','owner')
+    fields          = ('owner','poke_id','name','sprite','types',
+                       'description','health','attack','defense',
+                       'special_attack','special_defense','speed')
+    readonly_fields = ('name','sprite','types','description',
+                       'health','attack','defense',
+                       'special_attack','special_defense','speed')
 
     def save_model(self, request, obj, form, change):
-        # On create or when poke_id is changed, fetch fresh data
+        # whenever it's new or you change poke_id, re-fetch everything
         if not change or 'poke_id' in form.changed_data:
             data = fetch_pokemon(obj.poke_id)
-            obj.name        = data['name']
-            obj.sprite      = data['sprite']
-            obj.types       = data['types']
-            obj.description = data['description']
-            obj.health      = data['health']
+
+            # build a lookup: stat_name -> base_stat
+            stat_map = {
+                stat_block['stat']['name']: stat_block['base_stat']
+                for stat_block in data['stats']
+            }
+
+            # assign each field
+            obj.name            = data['name']
+            obj.sprite          = data['sprite']
+            obj.types           = data['types']
+            obj.description     = data['description']
+
+            obj.health          = stat_map.get('hp', 0)
+            obj.attack          = stat_map.get('attack', 0)
+            obj.defense         = stat_map.get('defense', 0)
+            obj.special_attack  = stat_map.get('special-attack', 0)
+            obj.special_defense = stat_map.get('special-defense', 0)
+            obj.speed           = stat_map.get('speed', 0)
+
         super().save_model(request, obj, form, change)
 
 admin.site.register(Report)
@@ -49,3 +70,10 @@ class TradeAdmin(admin.ModelAdmin):
     list_editable = ('is_approved_by_admin',)
     list_filter = ('is_accepted', 'is_approved_by_admin')
     search_fields = ('sender__username', 'receiver__username')
+
+
+@admin.register(Listing)
+class ListingAdmin(admin.ModelAdmin):
+    list_display  = ("pokemon", "seller", "price", "created_at")
+    list_filter   = ("seller",)
+    search_fields = ("pokemon__name", "seller__user__username")

@@ -1,31 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container-medium" style="margin-top: 3rem; text-align: center;">
+  <div class="container-medium" style="margin-top:3rem;">
     <h1>Marketplace</h1>
-    <p>Welcome to the Pokémon card marketplace. Browse and trade with other trainers!</p>
-
     <div class="marketplace-grid">
-        {% for pokemon in pokemon_list %}
+      {% for listing in listings %}
         <div class="pokemon-card">
-            <img src="{{ pokemon.sprite }}"
-                 alt="{{ pokemon.name }} sprite"
-                 class="pokemon-card-img"
-            />
+          <img src="{{ listing.pokemon.sprite }}" class="pokemon-card-img"/>
+          <h2>{{ listing.pokemon.name }}</h2>
+          <p>Type: {{ listing.pokemon.types|join:', ' }}</p>
+          <p>HP:   {{ listing.pokemon.health }}</p>
+          <p><strong>Price: {{ listing.price }} ⚪️</strong></p>
 
-            <h2 class="pokemon-card-h2">
-                {{ pokemon.name }}
-            </h2>
-
-            <p >
-                Type: {{ pokemon.types|join:", " }}
-            </p>
-            <p class="pokemon-card-p">
-                HP: {{ pokemon.health }}
-            </p>
+          {% if user.is_authenticated %}
+            {% if listing.seller == user.profile %}
+              <em>Your listing</em>
+            {% else %}
+              <form action="{% url 'buy_listing' listing.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="cta-button">Buy</button>
+              </form>
+            {% endif %}
+          {% endif %}
         </div>
-        {% empty %}
-        <p>No Pokémon found in the marketplace.</p>
-        {% endfor %}
+      {% empty %}
+        <p>No Pokémon listed yet.</p>
+      {% endfor %}
     </div>
-</div>
+  </div>
 {% endblock %}

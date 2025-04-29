@@ -3,19 +3,20 @@ from django.shortcuts import render, redirect, resolve_url, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
 
-from .forms import TradeForm, ProfileForm
-from .models import Pokemon, Profile
+from .models import Pokemon, Profile, Listing
 from collections import Counter
 from .forms import TradeForm, ProfileForm
 from .models import Pokemon, Profile, Trade
 import random
-
+from decimal import Decimal
 from .utils import fetch_pokemon
 from django.utils import timezone
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Q
 from django.views.decorators.http import require_POST
 
@@ -51,6 +52,7 @@ def register(request):
 
 @login_required
 def choose_starter(request):
+    # 1) Seed session on first visit
     if 'starter_choices' not in request.session:
         request.session['starter_choices'] = random.sample(ALL_STARTERS, 3)
     starter_ids = request.session['starter_choices']
@@ -58,44 +60,44 @@ def choose_starter(request):
     if request.method == 'POST':
         selected = request.POST.get('starter')
         if selected and selected.isdigit():
-            selected_id = int(selected)
-            if selected_id in starter_ids:
+            pid = int(selected)
+            if pid in starter_ids:
                 profile = get_object_or_404(Profile, user=request.user)
 
-                # Fetch full data from API
-                data = fetch_pokemon(selected_id)
-                # Remove poke_id from defaults so get_or_create matches only on the lookup field
-                poke_defaults = {
-                    'name': data['name'],
-                    'sprite': data['sprite'],
-                    'types': data['types'],
-                    'description': data['description'],
-                    'health': data['health'],
-                }
-                pokemon_obj, created = Pokemon.objects.get_or_create(
-                    poke_id=selected_id,
-                    defaults=poke_defaults
-                )
-                # Add to the user’s M2M collection
-                profile.collection.add(pokemon_obj)
+                # 2) Fetch the up-to-date data from the API
+                data = fetch_pokemon(pid)
 
-                # Prevent re-selection
+                # 3) Create a brand-new card for this user
+                new_card = Pokemon.objects.create(
+                    owner      = profile,
+                    poke_id    = pid,
+                    name       = data['name'],
+                    sprite     = data['sprite'],
+                    types      = data['types'],
+                    description= data['description'],
+                    health     = data['health']
+                )
+
+                # 4) (Still) add it to the M2M for backward compatibility
+                profile.collection.add(new_card)
+
+                # 5) Prevent re-selection and send them on their way
                 del request.session['starter_choices']
                 return redirect('dashboard')
 
-        # --- 3) On GET (or invalid POST), build exactly three cards ---
+    # Build the three starter cards for display
     starters = []
     for pid in starter_ids:
         try:
             info = fetch_pokemon(pid)
         except Exception:
             info = {
-                'poke_id': pid,
-                'name': f'Pokémon #{pid}',
-                'sprite': '',
-                'types': [],
+                'poke_id':     pid,
+                'name':        f'Pokémon #{pid}',
+                'sprite':      '',
+                'types':       [],
                 'description': '',
-                'health': 0,
+                'health':      0,
             }
         starters.append(info)
 
@@ -122,9 +124,9 @@ def dashboard(request):
     return render(request, 'home/dashboard.html')
 
 def marketplace(request):
-    pokemons = Pokemon.objects.order_by('id')
+    listings = Listing.objects.select_related('pokemon', "seller").all()
     return render(request, 'home/marketplace.html', {
-        'pokemon_list': pokemons
+        'listings': listings
     })
 
 def collection(request):
@@ -278,3 +280,42 @@ def update_profile(request):
         form = ProfileForm(instance=profile)
 
     return render(request, 'home/update_profile.html', {'form': form})
+
+@login_required
+@require_POST
+def create_listing(request, pokemon_id):
+    profile = request.user.profile
+    pokemon = get_object_or_404(Pokemon, pk=pokemon_id, owner=profile)
+    price = Decimal(request.POST['price'])
+    Listing.objects.create(
+        pokemon=pokemon,
+        seller=profile,
+        price=price
+    )
+    messages.success(request, f"{pokemon.name} is now listed for {price} coins!")
+    return redirect('pokemon_detail', pokemon_id=pokemon_id)
+
+@login_required
+@require_POST
+def buy_listing(request, listing_id):
+    buyer = request.user.profile
+    listing = get_object_or_404(Listing, pk=listing_id)
+    if buyer.currency < listing.price:
+        messages.error(request, "Not enough PokéCoins!")
+    else:
+        seller = listing.seller
+        # transfer coins
+        buyer.currency  -= listing.price
+        seller.currency += listing.price
+        buyer.save()
+        seller.save()
+        # transfer ownership
+        p = listing.pokemon
+        p.owner = buyer
+        p.save()
+        # update M2M for backwards-compat
+        seller.collection.remove(p)
+        buyer.collection.add(p)
+        listing.delete()
+        messages.success(request, f"You bought {p.name} for {listing.price} coins!")
+    return redirect('pokemon_detail', pokemon_id=listing.pokemon.pk)

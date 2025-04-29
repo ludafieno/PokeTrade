@@ -28,8 +28,38 @@ class Report(models.Model):
         return f"{self.report_type} by {self.reporter.username}"
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(
+        upload_to=avatar_upload_to,
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Upload a profile picture'
+    )
+    collection = models.ManyToManyField(
+        'Pokemon',
+        blank=True,
+        related_name="owners",
+        help_text="All Pokémon this user owns"
+    )
+    currency = models.IntegerField(default=1000)
+    daily_reward = models.DateField(default=timezone.now)
+    bio = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+
 class Pokemon(models.Model):
-    poke_id     = models.PositiveIntegerField(unique=True, help_text="ID from PokéAPI")
+    owner = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        null = True,
+        blank = True,
+        related_name = 'pokemons',
+        help_text = 'Which Profile owns this card'
+    )
+    poke_id = models.PositiveIntegerField(help_text="ID from PokéAPI")
     name        = models.CharField(max_length=100)
     sprite      = models.URLField(blank=True, null=True)
     types       = models.JSONField(blank=True, null=True)
@@ -45,29 +75,6 @@ class Pokemon(models.Model):
         return f"#{self.poke_id} {self.name}"
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(
-        upload_to=avatar_upload_to,
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text='Upload a profile picture'
-    )
-    collection = models.ManyToManyField(
-        Pokemon,
-        blank=True,
-        related_name="owners",
-        help_text="All Pokémon this user owns"
-    )
-    currency = models.IntegerField(default=1000)
-    daily_reward = models.DateField(default=timezone.now)
-    bio = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.user.username}'s profile"
-
-
 class Trade(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_trades")
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_trades")
@@ -79,3 +86,33 @@ class Trade(models.Model):
 
     def __str__(self):
         return f"Trade from {self.sender.username} to {self.receiver.username}"
+
+
+class Listing(models.Model):
+    """
+    A marketplace entry: one Pokémon at a given price by a given seller.
+    """
+    pokemon     = models.ForeignKey(
+        Pokemon,
+        on_delete=models.CASCADE,
+        related_name="listings",
+        help_text="Pokémon being sold"
+    )
+    seller      = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="listings",
+        help_text="Who is selling this Pokémon"
+    )
+    price       = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Sale price in PokéCoins"
+    )
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["price"]   # cheapest first
+
+    def __str__(self):
+        return f"{self.pokemon.name} for {self.price} coins"

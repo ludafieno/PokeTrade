@@ -19,7 +19,16 @@ urlpatterns = [
     path('account/delete/', views.delete_account, name='delete_account'),
     path('pokemon/<int:pokemon_id>/', views.pokemon_detail, name='pokemon_detail'),
     path('trade/respond/<int:trade_id>/', views.respond_trade, name='respond_trade'),
-
+    path(
+        'pokemon/<int:pokemon_id>/list/',
+        views.create_listing,
+        name='create_listing'
+    ),
+    path(
+        'listing/<int:listing_id>/buy/',
+        views.buy_listing,
+        name='buy_listing'
+    ),
 
 
 

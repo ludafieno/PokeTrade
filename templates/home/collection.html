@@ -1,16 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container-medium" style="margin-top:3rem;">
-  <h1>{{ request.user.username }}’s Collection</h1>
-  <p><strong>Total Pokémon:</strong> {{ total }}</p>
-  <p><strong>Favorite type:</strong> {{ fav_type }}</p>
-    <form method="get" style="margin: 1rem 0;">
-  <label for="sort"><strong>Sort by:</strong></label>
-  <select name="sort" id="sort" onchange="this.form.submit()">
-    <option value="poke_id" {% if sort_by == "poke_id" %}selected{% endif %}>Pokédex Number</option>
-    <option value="name" {% if sort_by == "name" %}selected{% endif %}>Name (A–Z)</option>
-  </select>
-    </form>
   <!-- Header: username, totals on the left; avatar + form on the right -->
   <div class="profile-header" style="
        display: flex;
@@ -23,7 +13,15 @@
       <h1>{{ request.user.username }}’s Collection</h1>
       <p><strong>Total Pokémon:</strong> {{ total }}</p>
       <p><strong>Favorite type:</strong> {{ fav_type }}</p>
+        <form method="get" style="margin: 1rem 0;">
+          <label for="sort"><strong>Sort by:</strong></label>
+          <select name="sort" id="sort" onchange="this.form.submit()">
+            <option value="poke_id" {% if sort_by == "poke_id" %}selected{% endif %}>Pokédex Number</option>
+            <option value="name" {% if sort_by == "name" %}selected{% endif %}>Name (A–Z)</option>
+          </select>
+    </form>
     </div>
+
 
     <!-- Avatar & upload form -->
     <div class="avatar-section" style="text-align: center;">

@@ -2,8 +2,22 @@
 {% load static %}
 
 {% block content %}
+
+{% if messages %}
+  <div class="flash-messages">
+    {% for message in messages %}
+      <div class="flash {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
 <div style="min-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
 
+ <div style="width: 100%; display: flex; justify-content: flex-end; padding: 1rem 2rem;">
+      <a href="{% url 'update_profile' %}" class="cta-button" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+        ✏️ Edit Profile
+      </a>
+ </div>
     <h1>Welcome, {{ user.username }}!</h1>
     <p style="font-weight: bold; color: #4CAF50;">Your Coins: {{ user.profile.currency }} PokéCoins</p>
     <p>You own {{ user.profile.collection.count }} Pokémon!</p>
@@ -29,6 +43,8 @@
             Logout
         </a>
     </div>
+
+
 
 </div>
 {% endblock %}

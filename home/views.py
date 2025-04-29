@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, resolve_url, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -5,13 +6,14 @@ from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
-
-from .forms import TradeForm
-from .models import Pokemon, Profile
-from collections import Counter
+from .forms import TradeForm, ProfileForm
+from .models import Pokemon, Profile, Trade
 import random
-
 from .utils import fetch_pokemon
+from django.utils import timezone
+from django.contrib import messages
+from django.db.models import Q
+from django.views.decorators.http import require_POST
 
 ALL_STARTERS = [
     1, 4, 7,
@@ -97,7 +99,20 @@ def choose_starter(request):
         'starters': starters
     })
 
+@login_required
+def update_profile(request):
+    profile = request.user.profile
 
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('dashboard')
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(request, 'home/update_profile.html', {'form': form})
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
@@ -113,20 +128,39 @@ def about(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'home/dashboard.html')
+    profile = request.user.profile
+    today = timezone.now().date()
+    if profile.daily_reward != today:
+        profile.currency += 100
+        profile.daily_reward = today
+        gen1_pokemon = Pokemon.objects.filter(poke_id__lte=151)
+        if gen1_pokemon.exists():
+            random_pokemon = random.choice(gen1_pokemon)
+            profile.collection.add(random_pokemon)
+        profile.save()
+        messages.success(request, "🎉 You earned 100 PokéCoins and 1 Pokémon today!")
 
+    return render(request, 'home/dashboard.html', {
+        'user': request.user
+    })
 def marketplace(request):
     pokemons = Pokemon.objects.order_by('id')
     return render(request, 'home/marketplace.html', {
         'pokemon_list': pokemons
     })
 
+from collections import Counter
+
 def collection(request):
     profile = request.user.profile
-    pokemons = profile.collection.all()
-    total = pokemons.count()
+    sort_by = request.GET.get('sort', 'poke_id')  # default to pokedex number
 
-    # Find favorite type
+    if sort_by == 'name':
+        pokemons = profile.collection.all().order_by('name')
+    else:
+        pokemons = profile.collection.all().order_by('poke_id')
+
+    total = pokemons.count()
     all_types = [t for p in pokemons for t in (p.types or [])]
     fav = Counter(all_types).most_common(1)
     fav_type = fav[0][0] if fav else "None"
@@ -135,7 +169,9 @@ def collection(request):
         'total': total,
         'fav_type': fav_type,
         'pokemons': pokemons,
+        'sort_by': sort_by,
     })
+
 
 @login_required
 def trade(request):
@@ -162,7 +198,37 @@ def trade(request):
     form.fields['offered_pokemon'].queryset = request.user.profile.collection.all()
     form.fields['requested_pokemon'].queryset = Pokemon.objects.exclude(owners=request.user.profile)
 
+    trade_history = Trade.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-created_at')
+
     return render(request, 'home/trade.html', {'form': form})
+
+def pending_trades(request):
+    pending = Trade.objects.filter(receiver=request.user, is_accepted=False)
+    return render(request, 'home/pending_trades.html', {'pending': pending})
+
+@require_POST
+def respond_trade(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id, receiver=request.user)
+
+    action = request.POST.get("action")
+
+    if action == "accept":
+        sender_profile = trade.sender.profile
+        receiver_profile = trade.receiver.profile
+
+        trade.offered_pokemon.owners.remove(sender_profile)
+        trade.offered_pokemon.owners.add(receiver_profile)
+
+        trade.requested_pokemon.owners.remove(receiver_profile)
+        trade.requested_pokemon.owners.add(sender_profile)
+
+        trade.is_accepted = True
+        trade.save()
+
+    elif action == "reject":
+        trade.delete()
+
+    return redirect('pending_trades')
 
 @login_required
 def report_issue(request):
@@ -180,4 +246,32 @@ def report_issue(request):
 def logout_view(request):
     logout(request)
     return redirect('index')
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, "Your account has been deleted.")
+        return redirect('index')  # or wherever you want
+
+    return render(request, 'home/delete_account.html')
+
+def pokemon_detail(request, pokemon_id):
+    pokemon = get_object_or_404(Pokemon, id=pokemon_id)
+
+    # Create stat labels and values here
+    stats = [
+        ("HP", pokemon.health),
+        ("Attack", pokemon.attack),
+        ("Defense", pokemon.defense),
+        ("Sp. Attack", pokemon.special_attack),
+        ("Sp. Defense", pokemon.special_defense),
+        ("Speed", pokemon.speed)
+    ]
+
+    return render(request, 'home/pokemon_detail.html', {
+        'pokemon': pokemon,
+        'stats': stats,
+    })
 

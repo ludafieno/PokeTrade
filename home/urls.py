@@ -14,8 +14,18 @@ urlpatterns = [
     path('trade/', views.trade, name='trade'),
     path('logout/', views.logout_view, name='logout'),
     path('report/', views.report_issue, name='report'),
-
     path('choose_starter/', views.choose_starter, name='choose_starter'),
+    path('profile/update/', views.update_profile, name='update_profile'),
+    path('account/delete/', views.delete_account, name='delete_account'),
+    path('pokemon/<int:pokemon_id>/', views.pokemon_detail, name='pokemon_detail'),
+    path('trade/respond/<int:trade_id>/', views.respond_trade, name='respond_trade'),
+
+
+
+
+
+
+
 
 
 

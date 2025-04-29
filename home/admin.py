@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Pokemon, Report
+from .models import Profile, Pokemon, Report, Trade
 from django import forms
 
 from .utils import fetch_pokemon
@@ -42,3 +42,10 @@ class ProfileAdmin(admin.ModelAdmin):
     form = ProfileForm
     list_display = ['user']
     filter_horizontal = ('collection',)
+
+@admin.register(Trade)
+class TradeAdmin(admin.ModelAdmin):
+    list_display = ('sender', 'receiver', 'offered_pokemon', 'requested_pokemon', 'is_accepted', 'is_approved_by_admin', 'created_at')
+    list_editable = ('is_approved_by_admin',)
+    list_filter = ('is_accepted', 'is_approved_by_admin')
+    search_fields = ('sender__username', 'receiver__username')

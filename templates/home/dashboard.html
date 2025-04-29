@@ -1,19 +1,34 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-<div class="container-medium" style="margin-top: 3rem; text-align: center;">
+<div style="min-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+
     <h1>Welcome, {{ user.username }}!</h1>
-    <p>Select where you'd like to go:</p>
+    <p style="font-weight: bold; color: #4CAF50;">Your Coins: {{ user.profile.currency }} PokéCoins</p>
+    <p>You own {{ user.profile.collection.count }} Pokémon!</p>
 
-    <div class="dashboard-options">
-        <a href="{% url 'marketplace' %}" class="dashboard-btn">🛒 Marketplace</a>
-        <a href="{% url 'collection' %}" class="dashboard-btn">📂 My Collection</a>
-        <a href="{% url 'trade' %}" class="dashboard-btn">🔁 Trade Cards</a>
+    <div style="margin-top: 20px;">
+        {% if user.profile.collection.all %}
+            {% with random_pokemon=user.profile.collection.all|random %}
+                <img src="{{ random_pokemon.sprite }}" alt="{{ random_pokemon.name }}" style="width: 200px;">
+            {% endwith %}
+        {% else %}
+            <p>You don't have any Pokémon yet! Start trading!</p>
+        {% endif %}
     </div>
 
-    <div class="logout-section">
-        <img src="{% static 'images/lugia.png' %}" alt="Lugia" class="dashboard-image">
-        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    <div style="margin-top: 30px; display: flex; gap: 20px;">
+        <a href="{% url 'marketplace' %}" class="dashboard-btn">Marketplace</a>
+        <a href="{% url 'collection' %}" class="dashboard-btn">My Collection</a>
+        <a href="{% url 'trade' %}" class="dashboard-btn">Trade Cards</a>
     </div>
+
+    <div style="margin-top: 20px;">
+        <a href="{% url 'logout' %}" style="background-color: #f44336; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">
+            Logout
+        </a>
+    </div>
+
 </div>
 {% endblock %}

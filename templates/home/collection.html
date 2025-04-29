@@ -1,12 +1,88 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container-medium" style="margin-top:3rem;">
-  <h1>{{ request.user.username }}’s Collection</h1>
-  <p><strong>Total Pokémon:</strong> {{ total }}</p>
-  <p><strong>Favorite type:</strong> {{ fav_type }}</p>
+  <!-- Header: username, totals on the left; avatar + form on the right -->
+  <div class="profile-header" style="
+       display: flex;
+        align-items: center;
+        gap: 2rem;    /* no justify-content, so items hug left */
+        margin-top: 3rem;
+    ">
+    <!-- User info -->
+    <div class="user-info">
+      <h1>{{ request.user.username }}’s Collection</h1>
+      <p><strong>Total Pokémon:</strong> {{ total }}</p>
+      <p><strong>Favorite type:</strong> {{ fav_type }}</p>
+    </div>
 
+    <!-- Avatar & upload form -->
+    <div class="avatar-section" style="text-align: center;">
+      {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}"
+             alt="{{ request.user.username }}"
+             style="
+               width: 120px;
+               height: 120px;
+               border-radius: 50%;
+               object-fit: cover;
+             ">
+      {% else %}
+        <div style="
+              width: 120px;
+              height: 120px;
+              background: #eee;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+          No Image
+        </div>
+      {% endif %}
+      <form method="post"
+      enctype="multipart/form-data"
+      id="avatar-form"
+      style="margin-top: 0.5rem; text-align: center;">
+  {% csrf_token %}
+  {% if form.errors %}
+    <div style="color:red; font-size:0.9rem;">
+      {{ form.errors.avatar }}
+    </div>
+  {% endif %}
+  <input
+    type="file"
+    name="avatar"
+    id="avatar-input"
+    style="display: none;"
+    onchange="document.getElementById('avatar-form').submit()"
+  >
+
+  <!-- Label acts as the clickable button -->
+  <label
+    for="avatar-input"
+    class="cta-button"
+    style="
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      display: inline-block;
+      cursor: pointer;
+    "
+  >
+    Change Picture
+  </label>
+</form>
+    </div>
+  </div>
+
+  <!-- Pokémon grid -->
   <h2 style="margin-top:2rem;">Your Pokémon</h2>
-  <div class="marketplace-grid" style="display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:1rem;">
+  <div class="marketplace-grid" style="
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    ">
     {% for p in pokemons %}
       <div class="pokemon-card">
         <img src="{{ p.sprite }}"

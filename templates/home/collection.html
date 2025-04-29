@@ -1,7 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container-medium" style="margin-top: 3rem; text-align: center;">
-    <h1>Your Collection</h1>
-    <p>View and manage your Pokémon card collection here.</p>
+<div class="container-medium" style="margin-top:3rem;">
+  <h1>{{ request.user.username }}’s Collection</h1>
+  <p><strong>Total Pokémon:</strong> {{ total }}</p>
+  <p><strong>Favorite type:</strong> {{ fav_type }}</p>
+
+  <h2 style="margin-top:2rem;">Your Pokémon</h2>
+  <div class="marketplace-grid" style="display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:1rem;">
+    {% for p in pokemons %}
+      <div class="pokemon-card">
+        <img src="{{ p.sprite }}"
+             alt="{{ p.name }}"
+             style="width:96px; height:96px; object-fit:contain;">
+        <h3>#{{ p.poke_id }} {{ p.name }}</h3>
+        <p>Type: {{ p.types|join:", " }}</p>
+        <p>HP: {{ p.health }}</p>
+      </div>
+    {% empty %}
+      <p>You haven’t collected any Pokémon yet.</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

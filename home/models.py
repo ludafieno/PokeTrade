@@ -15,11 +15,27 @@ class Report(models.Model):
     def __str__(self):
         return f"{self.report_type} by {self.reporter.username}"
 
+
+class Pokemon(models.Model):
+    poke_id     = models.PositiveIntegerField(unique=True, help_text="ID from PokéAPI")
+    name        = models.CharField(max_length=100)
+    sprite      = models.URLField(blank=True, null=True)
+    types       = models.JSONField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    health      = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"#{self.poke_id} {self.name}"
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    starter_pokemon = models.CharField(max_length=30, blank=True)
+    collection = models.ManyToManyField(
+        Pokemon,
+        blank=True,
+        related_name="owners",
+        help_text="All Pokémon this user owns"
+    )
 
     def __str__(self):
         return f"{self.user.username}'s profile"
-
-

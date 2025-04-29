@@ -2,13 +2,18 @@
 {% load static %}
 {% block content %}
 <div class="section-hero">
+    <img class="cover-img" src={% static 'images/coverPic.png' %}>
     <div class="hero-content-wrapper">
         <div class="hero-text-wrap">
             <div class="heading-xlarge">Welcome to PokeTrade</div>
             <p>Start trading Pokémon cards with other trainers now!</p>
             <div style="margin-top: 2rem;">
-                <a href="{% url 'register' %}" class="cta-button">Create Account</a>
-                <a href="{% url 'login' %}" class="cta-button" style="margin-left: 1rem;">Login</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="cta-button">Go to Dashboard</a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="cta-button">Create Account</a>
+                    <a href="{% url 'login' %}" class="cta-button" style="margin-left: 1rem;">Login</a>
+                {% endif %}
             </div>
         </div>
         <img class="snorlax" src="{% static 'images/snorlax.png' %}" alt="Snorlax" />
